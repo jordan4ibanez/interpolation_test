@@ -57,7 +57,7 @@ struct YawRotationPackage {
         this.yawCorrection(yaw);
 
         // Uncomment this to see live info on yaw
-        writeln("yaw is: ", yaw);
+        // writeln("yaw is: ", yaw);
 
         assert(yaw >= -180.0 && yaw <= 180.0, "you done goofed");
 
