@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"jordan4ibanez"
+	],
+	"copyright": "Copyright © 2022, jordan4ibanez",
+	"description": "A thing to test interpolation",
+	"license": "MIT",
+	"name": "interpolation_test"
+}

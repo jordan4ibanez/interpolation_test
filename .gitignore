@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/interpolation_test
+interpolation_test.so
+interpolation_test.dylib
+interpolation_test.dll
+interpolation_test.a
+interpolation_test.lib
+interpolation_test-test-*
+*.exe
+*.o
+*.obj
+*.lst
