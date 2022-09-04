@@ -4,6 +4,7 @@
 	],
 	"copyright": "Copyright © 2022, jordan4ibanez",
 	"dependencies": {
+		"delta_time": "~>1.0.5",
 		"doml": "~>0.0.4"
 	},
 	"description": "A thing to test interpolation",
