@@ -35,18 +35,6 @@ struct YawRotationPackage {
             }
 
             internalSpeedMultiplier = speedMultiplier;
-            /*
-            double correctedDiff = diff;
-
-            // Now correct it more, in case of a small window where it can dead lock
-            if (correctedDiff == 0.0) {
-                correctedDiff = 0.1;
-            }
-
-            // Keep the rotational speed constant
-            internalSpeedMultiplier = (correctedDiff  / 360.0) * speedMultiplier;
-            writeln(internalSpeedMultiplier);
-            */
     }
 
     bool isDone() {
