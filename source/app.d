@@ -27,14 +27,14 @@ struct YawRotationPackage {
 
             diff = Math.abs(origin) + Math.abs(destination);
 
+            internalSpeedMultiplier = Math.abs(1.0 - (diff / 360)) * speedMultiplier;
+
             if (diff >= 180.0) {
                 // Overshoot it and correct later
                 // The signum is a multiplier based on if it's negative or positive (is 1 or -1)
                 double signum = Math.signum(destination);
                 destination = (Math.abs(destination) + 180.0) * signum;
             }
-
-            internalSpeedMultiplier = speedMultiplier;
     }
 
     bool isDone() {
@@ -57,7 +57,7 @@ struct YawRotationPackage {
         this.yawCorrection(yaw);
 
         // Uncomment this to see live info on yaw
-        // writeln("yaw is: ", yaw);
+        writeln("yaw is: ", yaw);
 
         assert(yaw >= -180.0 && yaw <= 180.0, "you done goofed");
 
