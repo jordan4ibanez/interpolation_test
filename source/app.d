@@ -2,60 +2,41 @@ import std.stdio;
 import delta_time;
 import Math = math;
 
-void main() {
-    int tests = 0;
 
-    double yaw = 0;
+// This is a completely structural functional yaw interpolation implementation
+// Yaws range -180.0 to 180.0
+struct YawRotationPackage {
+    private bool done = true;
 
-    double origin = 0;
-    double destination = 0;
-    double progress = 0;
+    private double origin = 0;
+    private double destination = 0;
+    private double progress = 0;
 
-    double internalSpeedMultiplier = 0.0;
+    private double internalSpeedMultiplier = 0.0;
+    private double diff = 0.0;
 
-    // This multiplier can be controlled based on how fast you want the object to interpolate
-    double speedMultiplier = 3.0;
+    private double yaw = 0.0;
 
-    bool doNew = true;
-
-    // These variable are soley used for testing!
-    double diff = 0.0;
-    double accumulator = 0.0;
-
-    // This should be an entity switch if it gets a new position
-    while(tests < 20) {
-        calculateDelta();
-
-        if (doNew) {
-            writeln("--------------------------------------------");
-            writeln("TEST ", tests);
-            writeln("--------------------------------------------");
-
-
+    this(double yaw, double yawDestination, double speedMultiplier) {
+            done = false;
             progress = 0.0;
             origin = yaw;
-            destination = (Math.random() * 360.0) - 180.0;
-            doNew = false;
-            accumulator = 0.0;
+            destination = yawDestination;
+
+            this.yaw = yaw;
 
             diff = Math.abs(origin) + Math.abs(destination);
 
-            // writeln("the test: ", internalSpeedMultiplier);
-
             if (diff >= 180.0) {
-                // writeln("overshooting");
                 // Overshoot it and correct later
                 // The signum is a multiplier based on if it's negative or positive (is 1 or -1)
-                // writeln("original destination: ", destination);
                 double signum = Math.signum(destination);
                 destination = (Math.abs(destination) + 180.0) * signum;
-                // writeln("corrected destination: ", destination);
-            } else {
-                // writeln("not overshooting");
             }
 
-            
-            double correctedDiff = Math.abs(Math.abs(origin) - Math.abs(destination));
+            internalSpeedMultiplier = speedMultiplier;
+            /*
+            double correctedDiff = diff;
 
             // Now correct it more, in case of a small window where it can dead lock
             if (correctedDiff == 0.0) {
@@ -63,19 +44,19 @@ void main() {
             }
 
             // Keep the rotational speed constant
-            internalSpeedMultiplier = Math.abs(1.0 - (correctedDiff / 360.0)) * speedMultiplier;
-            writeln("corrected diff is: ", correctedDiff);
-            writeln("speed multiplier = ", internalSpeedMultiplier);
-        }
+            internalSpeedMultiplier = (correctedDiff  / 360.0) * speedMultiplier;
+            writeln(internalSpeedMultiplier);
+            */
+    }
 
-        accumulator += getDelta();
+    bool isDone() {
+        return this.done;
+    }
 
-        // In production, STOP doing the interpolation
-        // Perhaps give the entity object a bool that is "interpolateNow"?
+    double interpolate() {
         if (progress >= 1.0) {
             progress = 1.0;
-            doNew = true;
-            tests++;
+            done = true;
         } else {
             // Goal has not been reached
             // This is the progress of the linear interpolation
@@ -85,33 +66,49 @@ void main() {
         yaw = Math.lerp(origin, destination, progress);
         
         // This is the overshoot correction
-        yawCorrection(yaw);
-
-        if (progress == 1.0) {
-            writeln("--------------------------------------------");
-            writeln("Destination reached! Destination was: ", destination);
-            writeln("The real yaw is now: ", yaw);
-            writeln("The diff was: ", diff);
-            writeln("It took roughtly: ", accumulator, " seconds");
-            writeln("--------------------------------------------");
-        }
+        this.yawCorrection(yaw);
 
         // Uncomment this to see live info on yaw
         // writeln("yaw is: ", yaw);
 
         assert(yaw >= -180.0 && yaw <= 180.0, "you done goofed");
 
-        // Corrected value is what the rest of the program has accessed to (-180.0 to 180.0)
+        return yaw;
+    }
+
+
+    // Overflow or underflow the yaw
+    private void yawCorrection(ref double yaw) {
+        if (yaw < -180.0) {
+            yaw += 360.0;
+        } else if (yaw > 180.0) {
+            yaw -= 360.0;
+        }
+    }
+}
+
+void main() {
+    int tests = 0;
+
+    double yaw = 0;
+
+    // This multiplier can be controlled based on how fast you want the object to interpolate
+    double speedMultiplier = 3.0;
+
+
+    YawRotationPackage yawWorker = YawRotationPackage(yaw, (Math.random() * 360.0) - 180.0, speedMultiplier);
+
+    while(tests < 20) {
+        calculateDelta();
+
+        yaw = yawWorker.interpolate();     
+        
+        if (yawWorker.isDone()) {
+            writeln("DONE! yaw is: ", yaw);
+            yawWorker = YawRotationPackage(yaw, (Math.random() * 360.0) - 180.0, speedMultiplier);
+        }
     }
 	
 }
 
-void yawCorrection(ref double yaw) {
-    if (yaw < -180.0) {
-        yaw += 360.0;
-        // writeln("yaw has underflowed ---------");
-    } else if (yaw > 180.0) {
-        yaw -= 360.0;
-        // writeln("yaw has overflowed +++++++++");
-    }
-}
+
