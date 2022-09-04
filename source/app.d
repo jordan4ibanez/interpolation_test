@@ -11,6 +11,8 @@ void main() {
     double destination = 0;
     double progress = 0;
 
+    double internalSpeedMultiplier = 0.0;
+
     // This multiplier can be controlled based on how fast you want the object to interpolate
     double speedMultiplier = 3.0;
 
@@ -38,7 +40,6 @@ void main() {
 
             diff = Math.abs(origin) + Math.abs(destination);
 
-
             // writeln("the test: ", internalSpeedMultiplier);
 
             if (diff >= 180.0) {
@@ -52,6 +53,19 @@ void main() {
             } else {
                 // writeln("not overshooting");
             }
+
+            
+            double correctedDiff = Math.abs(Math.abs(origin) - Math.abs(destination));
+
+            // Now correct it more, in case of a small window where it can dead lock
+            if (correctedDiff == 0.0) {
+                correctedDiff = 0.1;
+            }
+
+            // Keep the rotational speed constant
+            internalSpeedMultiplier = Math.abs(1.0 - (correctedDiff / 360.0)) * speedMultiplier;
+            writeln("corrected diff is: ", correctedDiff);
+            writeln("speed multiplier = ", internalSpeedMultiplier);
         }
 
         accumulator += getDelta();
@@ -65,7 +79,7 @@ void main() {
         } else {
             // Goal has not been reached
             // This is the progress of the linear interpolation
-            progress += getDelta() * speedMultiplier;
+            progress += getDelta() * internalSpeedMultiplier;
         }
 
         yaw = Math.lerp(origin, destination, progress);
@@ -87,7 +101,7 @@ void main() {
 
         assert(yaw >= -180.0 && yaw <= 180.0, "you done goofed");
 
-        // Corrected value is what the rest of the value has accessed to (-180.0 to 180.0)
+        // Corrected value is what the rest of the program has accessed to (-180.0 to 180.0)
     }
 	
 }
